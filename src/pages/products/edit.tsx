@@ -10,7 +10,7 @@ export const EditProduct = () => {
    * we won't need to manually invalidate the queries.
    */
   const { data, isLoading } = useOne({ resource: "products", id: 123 });
-  const { mutate, isLoading: isUpdating } = useUpdate();
+  const { mutate /*isLoading: isUpdating*/ } = useUpdate();
 
   if (isLoading) {
     return <div>Loading...</div>;
