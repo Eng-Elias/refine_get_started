@@ -12,6 +12,21 @@ export const dataProvider: DataProvider = {
 
     return { data };
   },
+  getMany: async ({ resource, ids }) => {
+    const params = new URLSearchParams();
+
+    if (ids) {
+      ids.forEach((id) => params.append("id", id.toString()));
+    }
+
+    const response = await fetch(`${API_URL}/${resource}?${params.toString()}`);
+
+    if (response.status < 200 || response.status > 299) throw response;
+
+    const data = await response.json();
+
+    return { data };
+  },
   update: async ({ resource, id, variables }) => {
     const response = await fetch(`${API_URL}/${resource}/${id}`, {
       method: "PATCH",
@@ -62,9 +77,11 @@ export const dataProvider: DataProvider = {
 
     const data = await response.json();
 
+    const total = Number(response.headers.get("x-total-count"));
+
     return {
       data,
-      total: 0, // We'll cover this in the next steps.
+      total,
     };
   },
   create: async ({ resource, variables }) => {
