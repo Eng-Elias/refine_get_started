@@ -3,9 +3,16 @@ import type { DataProvider } from "@refinedev/core";
 const API_URL = "https://api.fake-rest.refine.dev";
 
 export const dataProvider: DataProvider = {
-  getOne: () => {
-    throw new Error("Not implemented");
+  getOne: async ({ resource, id }) => {
+    const response = await fetch(`${API_URL}/${resource}/${id}`);
+
+    if (response.status < 200 || response.status > 299) throw response;
+
+    const data = await response.json();
+
+    return { data };
   },
+  getApiUrl: () => API_URL,
   update: () => {
     throw new Error("Not implemented");
   },
@@ -18,11 +25,5 @@ export const dataProvider: DataProvider = {
   deleteOne: () => {
     throw new Error("Not implemented");
   },
-  getApiUrl: () => API_URL,
-  // Optional methods:
-  // getMany: () => { /* ... */ },
-  // createMany: () => { /* ... */ },
-  // deleteMany: () => { /* ... */ },
-  // updateMany: () => { /* ... */ },
-  // custom: () => { /* ... */ },
+  /* ... */
 };
