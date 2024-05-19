@@ -9,7 +9,7 @@ export const ListProducts = () => {
     sorters,
     setSorters,
   } = useTable({
-    resource: "products",
+    resource: "protected-products",
     pagination: { current: 1, pageSize: 10 },
     sorters: { initial: [{ field: "id", order: "asc" }] },
   });
@@ -66,21 +66,21 @@ export const ListProducts = () => {
   return (
     <div>
       <h1>Products</h1>
-      <table border={1}>
+      <table>
         <thead>
           <tr>
             <th onClick={() => onSort("id")}>
-              ID {indicator[getSorter("id")!]}
+              ID {indicator[getSorter("id")]}
             </th>
             <th onClick={() => onSort("name")}>
-              Name {indicator[getSorter("name")!]}
+              Name {indicator[getSorter("name")]}
             </th>
             <th>Category</th>
             <th onClick={() => onSort("material")}>
-              Material {indicator[getSorter("material")!]}
+              Material {indicator[getSorter("material")]}
             </th>
             <th onClick={() => onSort("price")}>
-              Price {indicator[getSorter("price")!]}
+              Price {indicator[getSorter("price")]}
             </th>
           </tr>
         </thead>

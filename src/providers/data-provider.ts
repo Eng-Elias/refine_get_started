@@ -2,59 +2,22 @@ import type { DataProvider } from "@refinedev/core";
 
 const API_URL = "https://api.fake-rest.refine.dev";
 
+const fetcher = async (url: string, options?: RequestInit) =>
+  fetch(url, {
+    ...options,
+    headers: {
+      ...options?.headers,
+      Authorization: localStorage.getItem("my_access_token"),
+    },
+  });
+
 export const dataProvider: DataProvider = {
-  getOne: async ({ resource, id }) => {
-    const response = await fetch(`${API_URL}/${resource}/${id}`);
-
-    if (response.status < 200 || response.status > 299) throw response;
-
-    const data = await response.json();
-
-    return { data };
-  },
-  getMany: async ({ resource, ids }) => {
-    const params = new URLSearchParams();
-
-    if (ids) {
-      ids.forEach((id) => params.append("id", id.toString()));
-    }
-
-    const response = await fetch(`${API_URL}/${resource}?${params.toString()}`);
-
-    if (response.status < 200 || response.status > 299) throw response;
-
-    const data = await response.json();
-
-    return { data };
-  },
-  update: async ({ resource, id, variables }) => {
-    const response = await fetch(`${API_URL}/${resource}/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(variables),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (response.status < 200 || response.status > 299) throw response;
-
-    const data = await response.json();
-
-    return { data };
-  },
-  getApiUrl: () => API_URL,
-  getList: async ({ resource, pagination, sorters, filters /* meta*/ }) => {
+  getList: async ({ resource, pagination, filters, sorters, meta }) => {
     const params = new URLSearchParams();
 
     if (pagination) {
-      params.append(
-        "_start",
-        ((pagination.current! - 1) * pagination.pageSize!).toString(),
-      );
-      params.append(
-        "_end",
-        (pagination.current! * pagination.pageSize!).toString(),
-      );
+      params.append("_start", (pagination.current - 1) * pagination.pageSize);
+      params.append("_end", pagination.current * pagination.pageSize);
     }
 
     if (sorters && sorters.length > 0) {
@@ -71,7 +34,9 @@ export const dataProvider: DataProvider = {
       });
     }
 
-    const response = await fetch(`${API_URL}/${resource}?${params.toString()}`);
+    const response = await fetcher(
+      `${API_URL}/${resource}?${params.toString()}`,
+    );
 
     if (response.status < 200 || response.status > 299) throw response;
 
@@ -84,8 +49,34 @@ export const dataProvider: DataProvider = {
       total,
     };
   },
+  getMany: async ({ resource, ids, meta }) => {
+    const params = new URLSearchParams();
+
+    if (ids) {
+      ids.forEach((id) => params.append("id", id));
+    }
+
+    const response = await fetcher(
+      `${API_URL}/${resource}?${params.toString()}`,
+    );
+
+    if (response.status < 200 || response.status > 299) throw response;
+
+    const data = await response.json();
+
+    return { data };
+  },
+  getOne: async ({ resource, id, meta }) => {
+    const response = await fetcher(`${API_URL}/${resource}/${id}`);
+
+    if (response.status < 200 || response.status > 299) throw response;
+
+    const data = await response.json();
+
+    return { data };
+  },
   create: async ({ resource, variables }) => {
-    const response = await fetch(`${API_URL}/${resource}`, {
+    const response = await fetcher(`${API_URL}/${resource}`, {
       method: "POST",
       body: JSON.stringify(variables),
       headers: {
@@ -99,6 +90,22 @@ export const dataProvider: DataProvider = {
 
     return { data };
   },
+  update: async ({ resource, id, variables }) => {
+    const response = await fetcher(`${API_URL}/${resource}/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(variables),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status < 200 || response.status > 299) throw response;
+
+    const data = await response.json();
+
+    return { data };
+  },
+  getApiUrl: () => API_URL,
   deleteOne: () => {
     throw new Error("Not implemented");
   },
