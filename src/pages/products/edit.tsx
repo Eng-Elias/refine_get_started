@@ -2,12 +2,11 @@ import { useForm, useSelect } from "@refinedev/core";
 
 export const EditProduct = () => {
   const { onFinish, mutationResult, queryResult } = useForm({
-    action: "edit",
-    resource: "products",
-    id: "123",
+    // This will redirect to the show page after the mutation is successful.
+    redirect: "show",
   });
 
-  const record = queryResult?.data?.data;
+  const record = queryResult.data?.data;
 
   const { options } = useSelect({
     resource: "categories",
@@ -16,9 +15,7 @@ export const EditProduct = () => {
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // Using FormData to get the form values and convert it to an object.
-    const data = Object.fromEntries(
-      new FormData(event.target as HTMLFormElement).entries(),
-    );
+    const data = Object.fromEntries(new FormData(event.target).entries());
     // Calling onFinish to submit with the data we've collected from the form.
     onFinish({
       ...data,
