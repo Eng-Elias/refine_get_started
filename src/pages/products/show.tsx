@@ -1,94 +1,66 @@
-import { useForm } from "@refinedev/react-hook-form";
-import { Edit, useAutocomplete } from "@refinedev/mui";
+import { useShow, useOne } from "@refinedev/core";
+import {
+  Show,
+  TextFieldComponent as TextField,
+  NumberField,
+  MarkdownField,
+} from "@refinedev/mui";
 
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
 
-import { Controller } from "react-hook-form";
-
-export const EditProduct = () => {
+export const ShowProduct = () => {
   const {
-    register,
-    control,
-    saveButtonProps,
-    refineCore: { queryResult },
-    formState: { errors },
-  } = useForm();
+    queryResult: { data, isLoading },
+  } = useShow();
 
-  const { autocompleteProps } = useAutocomplete({
+  const { data: categoryData, isLoading: categoryIsLoading } = useOne({
     resource: "categories",
-    defaultValue: queryResult?.data?.data?.category?.id,
+    id: data?.data?.category.id || "",
+    queryOptions: {
+      enabled: !!data?.data,
+    },
   });
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <Edit saveButtonProps={saveButtonProps}>
-      <Box
-        component="form"
-        sx={{ display: "flex", flexDirection: "column", gap: "12px" }}
-        autoComplete="off"
-      >
+    <Show>
+      <Stack gap={1}>
+        <Typography variant="body1" fontWeight="bold">
+          Id
+        </Typography>
+        <TextField value={data?.data?.id} />
+
+        <Typography variant="body1" fontWeight="bold">
+          Name
+        </Typography>
+        <TextField value={data?.data?.name} />
+
+        <Typography variant="body1" fontWeight="bold">
+          Description
+        </Typography>
+        <MarkdownField value={data?.data?.description} />
+
+        <Typography variant="body1" fontWeight="bold">
+          Material
+        </Typography>
+        <TextField value={data?.data?.material} />
+
+        <Typography variant="body1" fontWeight="bold">
+          Category
+        </Typography>
         <TextField
-          {...register("name")}
-          label="Name"
-          error={!!errors.name}
-          helperText={errors.name?.message}
+          value={categoryIsLoading ? "Loading..." : categoryData?.data?.title}
         />
-        <TextField
-          {...register("description")}
-          multiline
-          label="Description"
-          error={!!errors.description}
-          helperText={errors.description?.message}
-        />
-        <TextField
-          {...register("material")}
-          label="Material"
-          error={!!errors.material}
-          helperText={errors.material?.message}
-        />
-        <Controller
-          control={control}
-          name="category"
-          defaultValue={null}
-          render={({ field }) => (
-            <Autocomplete
-              id="category"
-              {...autocompleteProps}
-              {...field}
-              onChange={(_, value) => field.onChange(value)}
-              getOptionLabel={(item) => {
-                return (
-                  autocompleteProps?.options?.find(
-                    (option) => option?.id == item?.id,
-                  )?.title ?? ""
-                );
-              }}
-              isOptionEqualToValue={(option, value) => {
-                return (
-                  value === undefined || option?.id == (value?.id ?? value)
-                );
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Category"
-                  variant="outlined"
-                  margin="normal"
-                  error={!!errors.category}
-                  helperText={errors.category?.message}
-                />
-              )}
-            />
-          )}
-        />
-        <TextField
-          {...register("price")}
-          label="Price"
-          error={!!errors.price}
-          helperText={errors.price?.message}
-        />
-      </Box>
-    </Edit>
+
+        <Typography variant="body1" fontWeight="bold">
+          Price
+        </Typography>
+        <NumberField value={data?.data?.price} />
+      </Stack>
+    </Show>
   );
 };
